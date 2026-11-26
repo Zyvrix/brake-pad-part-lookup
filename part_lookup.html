@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Brake Pad Part Lookup</title>
+  <script>
+    // Edit these details for your business before publishing.
+    const CONTACT = {
+      companyName: "Your Company Name",
+      phone: "+91 00000 00000",
+      whatsappNumber: "910000000000",
+      email: "sales@example.com",
+      address: "Your business address",
+      workingHours: "Monday–Saturday, 9:00 AM–6:00 PM",
+      googleMapsLink: "https://maps.google.com/?q=Your+Business+Address"
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --card: #fff;
+      --text: #1a2230;
+      --muted: #5d6b80;
+      --accent: #1f3864;
+      --accent-text: #fff;
+      --line: #d9e0ea;
+      --ok: #1a7f4b;
+      --error: #b42318;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #10151d;
+      --card: #1a212c;
+      --text: #e8edf4;
+      --muted: #9aa8bb;
+      --accent: #6ea0ff;
+      --accent-text: #0b1220;
+      --line: #2b3544;
+      --ok: #4cc38a;
+      --error: #ff8c82;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #10151d;
+        --card: #1a212c;
+        --text: #e8edf4;
+        --muted: #9aa8bb;
+        --accent: #6ea0ff;
+        --accent-text: #0b1220;
+        --line: #2b3544;
+        --ok: #4cc38a;
+        --error: #ff8c82;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 Arial, Helvetica, sans-serif;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 16px; }
+    header, footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    header { margin-bottom: 20px; }
+    header a, footer a { font-weight: 600; }
+    footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); }
+    h1 { margin: 4px 0 18px; font-size: 1.5rem; }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    .card { margin-bottom: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; }
+    input, textarea {
+      width: 100%;
+      min-width: 0;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+    }
+    .search-row input { flex: 1 1 180px; }
+    button {
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.alt { border: 1px solid var(--accent); background: transparent; color: var(--accent); }
+    .button-link { display: inline-block; padding: 10px 14px; border-radius: 8px; background: var(--accent); color: var(--accent-text); font-weight: 600; text-decoration: none; }
+    button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .theme-toggle { min-height: 40px; padding: 7px 10px; font-size: .9rem; }
+    .error { margin: 10px 0 0; color: var(--error); }
+    .muted { color: var(--muted); font-size: .9rem; }
+    .pn { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
+    .price { color: var(--ok); font-size: 1.2rem; font-weight: 700; }
+    table { width: 100%; margin-top: 12px; border-collapse: collapse; }
+    td { padding: 9px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    td:first-child { width: 42%; color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+    .detail-actions { margin-top: 14px; }
+    .contact-info { display: grid; gap: 8px; margin: 0; }
+    .contact-info div { display: grid; grid-template-columns: minmax(100px, 34%) 1fr; gap: 8px; }
+    .contact-info dt { color: var(--muted); }
+    .contact-info dd { margin: 0; overflow-wrap: anywhere; }
+    label { display: block; margin: 12px 0 5px; font-weight: 600; }
+    textarea { min-height: 110px; resize: vertical; }
+    video { display: none; width: 100%; max-height: 300px; margin-top: 12px; border-radius: 8px; background: #000; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .label-card { min-width: 0; break-inside: avoid; border: 1px solid var(--line); border-radius: 8px; padding: 14px; text-align: center; background: #fff; color: #000; }
+    .label-card .qr { display: flex; min-height: 256px; justify-content: center; }
+    .label-card .qr canvas, .label-card .qr img { display: block; max-width: 100%; height: auto; }
+    .label-card b, .label-card small { display: block; }
+    .label-card b { margin-top: 6px; }
+    .label-card small { color: #444; font-size: .72rem; }
+    .label-card button { min-height: 36px; margin-top: 6px; padding: 6px 10px; font-size: .78rem; }
+    .hide { display: none !important; }
+    @media (max-width: 440px) {
+      .search-row button { flex: 1 1 auto; }
+      .contact-info div { grid-template-columns: 1fr; gap: 0; }
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    }
+    @media print {
+      header, footer, .noprint { display: none !important; }
+      body { background: #fff; }
+      .wrap { max-width: none; padding: 0; }
+      .label-card { border: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="noprint">
+      <a href="#lookup">Brake Pad Part Lookup</a>
+      <div class="row">
+        <a href="#contact">Contact</a>
+        <button class="alt theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme">Dark mode</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="lookup-view">
+        <h1>Brake Pad Part Lookup</h1>
+        <div class="row search-row noprint">
+          <input type="text" id="part-number" placeholder="Enter part number, e.g. BP-1001" aria-label="Part number" autocapitalize="characters" autocomplete="off">
+          <button id="search-button" type="button">Search</button>
+          <button class="alt" id="scan-button" type="button">Scan QR</button>
+        </div>
+        <video id="camera" playsinline muted></video>
+        <p class="error" id="lookup-error" role="status" aria-live="polite"></p>
+        <div id="result" aria-live="polite"></div>
+      </section>
+
+      <section id="contact-view" class="hide">
+        <h1>Contact</h1>
+        <div class="card">
+          <h2 id="company-name"></h2>
+          <dl class="contact-info">
+            <div><dt>Phone</dt><dd id="contact-phone"></dd></div>
+            <div><dt>WhatsApp</dt><dd id="contact-whatsapp"></dd></div>
+            <div><dt>Email</dt><dd id="contact-email"></dd></div>
+            <div><dt>Address</dt><dd id="contact-address"></dd></div>
+            <div><dt>Working hours</dt><dd id="contact-hours"></dd></div>
+            <div><dt>Map</dt><dd id="contact-map"></dd></div>
+          </dl>
+        </div>
+        <form class="card" id="enquiry-form">
+          <h2>Send an enquiry</h2>
+          <label for="enquiry-name">Name</label>
+          <input id="enquiry-name" name="name" autocomplete="name" required>
+          <label for="enquiry-phone">Phone</label>
+          <input id="enquiry-phone" name="phone" type="tel" autocomplete="tel" required>
+          <label for="enquiry-email">Email</label>
+          <input id="enquiry-email" name="email" type="email" autocomplete="email" required>
+          <label for="enquiry-part">Part number</label>
+          <input id="enquiry-part" name="partNumber" type="text" autocapitalize="characters">
+          <label for="enquiry-message">Message</label>
+          <textarea id="enquiry-message" name="message" required></textarea>
+          <div class="row" style="margin-top:14px">
+            <button type="submit">Prepare enquiry email</button>
+          </div>
+          <p class="muted" id="form-confirmation" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="labels-view" class="hide">
+        <div class="card noprint">
+          <p class="muted">Admin QR labels. Each code stores the part details as text, so a phone can read them without opening the website or using an internet connection.</p>
+          <div class="row">
+            <button class="alt" id="print-labels" type="button">Print labels</button>
+          </div>
+        </div>
+        <div class="grid" id="labels"></div>
+      </section>
+    </main>
+
+    <footer class="noprint"><a href="#contact">Contact</a></footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+  <script>
+    "use strict";
+
+    const $ = (id) => document.getElementById(id);
+    const FIELDS = [
+      ["Description", "Description"],
+      ["Make", "Make"],
+      ["Model / Application", "Fits"],
+      ["Position", "Position"],
+      ["Material", "Material"],
+      ["Brand", "Brand"],
+      ["Brake Type", "Brake type"],
+      ["Width (mm)", "Width (mm)"],
+      ["Cross Reference", "Cross reference"],
+      ["Stock (Qty)", "In stock"]
+    ];
+    let parts = [];
+    let partsByNumber = new Map();
+    let cameraStream = null;
+    let animationFrame = 0;
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function normalizedPartNumber(value) {
+      return String(value || "").trim().toUpperCase();
+    }
+
+    function showNotFound(value) {
+      $("result").innerHTML = '<div class="card"><p><strong>Part not found</strong></p><p>No part matches “' +
+        escapeHtml(value) + '”. Please check the number or <a href="#contact">contact us</a>.</p></div>';
+    }
+
+    function showPart(partNumber) {
+      const part = partsByNumber.get(normalizedPartNumber(partNumber));
+      $("lookup-error").textContent = "";
+      if (!part) {
+        $("result").innerHTML = "";
+        if (partNumber) showNotFound(partNumber);
+        return;
+      }
+
+      const price = Number(part["Price (INR)"]);
+      const priceText = Number.isFinite(price) ? price.toLocaleString("en-IN") : escapeHtml(part["Price (INR)"]);
+      let markup = '<div class="card"><div class="pn">' + escapeHtml(part["Part No"]) +
+        '</div><div class="price">₹ ' + priceText + '</div><table>';
+      FIELDS.forEach(([key, label]) => {
+        markup += "<tr><td>" + escapeHtml(label) + "</td><td>" + escapeHtml(part[key]) + "</td></tr>";
+      });
+      markup += '</table><div class="detail-actions"><a class="button-link" href="#contact?part=' +
+        encodeURIComponent(part["Part No"]) + '">Enquire about this part</a></div></div>';
+      $("result").innerHTML = markup;
+    }
+
+    function renderContact(partNumber) {
+      $("company-name").textContent = CONTACT.companyName;
+      $("contact-phone").innerHTML = '<a href="tel:' + escapeHtml(CONTACT.phone.replace(/[^\d+]/g, "")) + '">' +
+        escapeHtml(CONTACT.phone) + "</a>";
+      const whatsappNumber = CONTACT.whatsappNumber.replace(/\D/g, "");
+      $("contact-whatsapp").innerHTML = '<a href="https://wa.me/' + escapeHtml(whatsappNumber) + '">' +
+        escapeHtml(CONTACT.whatsappNumber) + "</a>";
+      $("contact-email").innerHTML = '<a href="mailto:' + escapeHtml(CONTACT.email) + '">' +
+        escapeHtml(CONTACT.email) + "</a>";
+      $("contact-address").textContent = CONTACT.address;
+      $("contact-hours").textContent = CONTACT.workingHours;
+      $("contact-map").innerHTML = '<a href="' + escapeHtml(CONTACT.googleMapsLink) +
+        '" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>';
+      $("enquiry-part").value = partNumber || "";
+      $("form-confirmation").textContent = "";
+    }
+
+    function extractPartNumber(text) {
+      const match = String(text).match(/BP-\d+/i);
+      return match ? match[0] : String(text).trim();
+    }
+
+    function qrTextForPart(part) {
+      return Object.keys(part).map((field) => field + ": " + part[field]).join("\n");
+    }
+
+    function route() {
+      let hash;
+      try {
+        hash = decodeURIComponent(location.hash.slice(1));
+      } catch (error) {
+        hash = location.hash.slice(1);
+      }
+      const queryIndex = hash.indexOf("?");
+      const routeName = queryIndex === -1 ? hash : hash.slice(0, queryIndex);
+      const query = new URLSearchParams(queryIndex === -1 ? "" : hash.slice(queryIndex + 1));
+      const isContact = routeName === "contact";
+      const isLabels = routeName === "labels";
+
+      $("lookup-view").classList.toggle("hide", isContact || isLabels);
+      $("contact-view").classList.toggle("hide", !isContact);
+      $("labels-view").classList.toggle("hide", !isLabels);
+      stopCamera();
+
+      if (isContact) {
+        renderContact(query.get("part") || "");
+      } else if (isLabels) {
+        buildLabels();
+      } else if (routeName && routeName !== "lookup") {
+        $("part-number").value = routeName;
+        if (parts.length) showPart(routeName);
+      } else {
+        $("result").innerHTML = "";
+        $("lookup-error").textContent = "";
+      }
+    }
+
+    function search() {
+      const value = $("part-number").value.trim();
+      if (!value) {
+        $("result").innerHTML = "";
+        $("lookup-error").textContent = "";
+        if (location.hash !== "#lookup") location.hash = "lookup";
+        return;
+      }
+      const part = partsByNumber.get(normalizedPartNumber(value));
+      if (part) {
+        if (location.hash !== "#" + part["Part No"]) location.hash = part["Part No"];
+        showPart(part["Part No"]);
+      } else {
+        if (location.hash !== "#lookup") location.hash = "lookup";
+        showNotFound(value);
+      }
+    }
+
+    function stopCamera() {
+      cancelAnimationFrame(animationFrame);
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+        cameraStream = null;
+      }
+      $("camera").style.display = "none";
+      $("scan-button").textContent = "Scan QR";
+    }
+
+    async function scan() {
+      if (cameraStream) {
+        stopCamera();
+        return;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.jsQR) {
+        $("lookup-error").textContent = "Camera scanning isn’t available here. Open this page on a secure connection or type the part number.";
+        return;
+      }
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const video = $("camera");
+        video.srcObject = cameraStream;
+        video.style.display = "block";
+        $("scan-button").textContent = "Stop scanning";
+        await video.play();
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        const scanFrame = () => {
+          if (video.readyState >= video.HAVE_ENOUGH_DATA && context) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            const image = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = window.jsQR(image.data, image.width, image.height);
+            if (code && code.data) {
+              const value = extractPartNumber(code.data.includes("#") ? code.data.split("#").pop() : code.data);
+              stopCamera();
+              $("part-number").value = value;
+              search();
+              return;
+            }
+          }
+          animationFrame = requestAnimationFrame(scanFrame);
+        };
+        scanFrame();
+      } catch (error) {
+        stopCamera();
+        if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
+          $("lookup-error").textContent = "Camera permission was denied. Allow camera access in your browser settings, or type the part number.";
+        } else if (error.name === "NotFoundError") {
+          $("lookup-error").textContent = "No camera was found on this device. Type the part number instead.";
+        } else {
+          $("lookup-error").textContent = "The camera could not be started. Check browser permissions or type the part number.";
+        }
+      }
+    }
+
+    function buildLabels() {
+      const grid = $("labels");
+      grid.innerHTML = "";
+      if (!parts.length) return;
+      parts.forEach((part) => {
+        const card = document.createElement("div");
+        card.className = "label-card";
+        const qr = document.createElement("div");
+        qr.className = "qr";
+        card.appendChild(qr);
+        if (window.QRCode) {
+          new QRCode(qr, {
+            text: qrTextForPart(part),
+            width: 256,
+            height: 256,
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } else {
+          qr.textContent = "QR library could not be loaded.";
+        }
+        card.insertAdjacentHTML("beforeend", "<b>" + escapeHtml(part["Part No"]) + "</b><small>" +
+          escapeHtml(part.Make + " " + part["Model / Application"]) + "</small>");
+        const download = document.createElement("button");
+        download.className = "alt noprint";
+        download.type = "button";
+        download.textContent = "Download PNG";
+        download.addEventListener("click", () => {
+          const canvas = qr.querySelector("canvas");
+          if (!canvas) return;
+          const link = document.createElement("a");
+          link.download = "QR_" + part["Part No"] + ".png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        });
+        card.appendChild(download);
+        grid.appendChild(card);
+      });
+    }
+
+    async function loadParts() {
+      try {
+        const response = await fetch("parts.json");
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("parts.json must contain a JSON array.");
+        parts = data;
+        partsByNumber = new Map(parts.map((part) => [normalizedPartNumber(part["Part No"]), part]));
+        route();
+      } catch (error) {
+        $("lookup-error").textContent = "Part data could not be loaded. Run this site from a local web server and check that parts.json is available.";
+        $("result").innerHTML = "";
+      }
+    }
+
+    $("search-button").addEventListener("click", search);
+    $("part-number").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") search();
+    });
+    $("scan-button").addEventListener("click", scan);
+    $("print-labels").addEventListener("click", () => window.print());
+    const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    $("theme-toggle").textContent = (document.documentElement.dataset.theme === "dark" ||
+      (!document.documentElement.dataset.theme && systemPrefersDark)) ? "Light mode" : "Dark mode";
+    $("theme-toggle").addEventListener("click", () => {
+      const isDark = document.documentElement.dataset.theme
+        ? document.documentElement.dataset.theme === "dark"
+        : systemPrefersDark;
+      const nextTheme = isDark ? "light" : "dark";
+      document.documentElement.dataset.theme = nextTheme;
+      $("theme-toggle").textContent = nextTheme === "dark" ? "Light mode" : "Dark mode";
+    });
+    $("enquiry-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) return;
+      const values = new FormData(form);
+      const message = [
+        "Name: " + values.get("name"),
+        "Phone: " + values.get("phone"),
+        "Email: " + values.get("email"),
+        "Part number: " + (values.get("partNumber") || ""),
+        "",
+        String(values.get("message"))
+      ].join("\n");
+      const subject = "Part enquiry" + (values.get("partNumber") ? " - " + values.get("partNumber") : "");
+      location.href = "mailto:" + CONTACT.email +
+        "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(message);
+      $("form-confirmation").textContent = "Your email app should open with the enquiry. Send the email to complete your request.";
+    });
+    window.addEventListener("hashchange", route);
+    route();
+    loadParts();
+  </script>
+</body>
+</html>
